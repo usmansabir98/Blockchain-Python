@@ -173,7 +173,35 @@ def add_transaction():
     response = {"message": f'This txn will be added to block {index}'}
     
     return jsonify(response), 201
+
+# connecting new nodes
+@app.route('/connect_node', methods=["POST"])
+def connect_node():
+    json = request.get_json()
+    nodes = json.get("nodes")
+    if nodes is None:
+        return "No Node", 400
     
+    for node in nodes:
+        blockchain.add_node(node)
+    response = {
+            "message": "All nodes connected",
+            "total_nodes": list(blockchain.nodes)
+            }
+    
+    return jsonify(response), 201
+
+# Replacing the chain by the longest chain if needed
+
+@app.route('/replace_chain', methods=["GET"])
+def replace_chain():
+    is_chain_replaced = blockchain.replace_chain()
+    
+    response = {"is_chain_replaced": is_chain_replaced,
+                "chain": blockchain.chain}
+    
+    return jsonify(response), 200
+
 app.run(host = '0.0.0.0', port= 5000)
 
 
